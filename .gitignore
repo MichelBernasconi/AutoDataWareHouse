@@ -1,0 +1,7 @@
+.env
+__pycache__/
+*.pyc
+postgres_data/
+.venv/
+venv/
+scratch/
