@@ -1,5 +1,6 @@
 import os
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.dialects.postgresql import insert
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,3 +18,14 @@ def get_engine():
         url = f"postgresql://{user}:{password}@{host}:{port}/{db_name}"
     
     return create_engine(url)
+
+def insert_on_conflict_nothing(table, conn, keys, data_iter):
+    """
+    Custom insert method for pandas.to_sql to handle 'ON CONFLICT DO NOTHING' in Postgres.
+    """
+    data = [dict(zip(keys, row)) for row in data_iter]
+    
+    # Get the actual table object from the Metadata
+    stmt = insert(table.table).values(data).on_conflict_do_nothing()
+    result = conn.execute(stmt)
+    return result.rowcount

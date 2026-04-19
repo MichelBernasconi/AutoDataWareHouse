@@ -1,6 +1,6 @@
 import os
 import sys
-from database import get_engine
+from database import get_engine, insert_on_conflict_nothing
 from collector import MarketCollector
 import pandas as pd
 
@@ -38,20 +38,13 @@ def run_etl(period="1d"):
     # 3. Load
     if not market_df.empty:
         print(f"Loading {len(market_df)} market records to database...")
-        # Use simple append. Duplicates will be handled by the DB constraint 
-        # (or throw an error if we don't handle them, but let's try to be smart)
-        try:
-            market_df.to_sql('market_data', engine, if_exists='append', index=False)
-        except Exception as e:
-            print(f"Note: Some records might already exist. ({e})")
-            # In a real DWH we would use an Upsert/Merge logic
+        # Use custom upsert method to skip existing records (symbol + timestamp)
+        market_df.to_sql('market_data', engine, if_exists='append', index=False, method=insert_on_conflict_nothing)
         
     if not rates_df.empty:
         print(f"Loading {len(rates_df)} exchange rate records to database...")
-        try:
-            rates_df.to_sql('exchange_rates', engine, if_exists='append', index=False)
-        except Exception as e:
-            print(f"Note: Some records might already exist. ({e})")
+        # Use custom upsert method to skip existing records (base + target + timestamp)
+        rates_df.to_sql('exchange_rates', engine, if_exists='append', index=False, method=insert_on_conflict_nothing)
         
     print("ETL Process Completed Successfully!")
 
