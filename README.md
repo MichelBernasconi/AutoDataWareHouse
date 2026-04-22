@@ -3,11 +3,11 @@
 AutoDataWareHouse is a modern, automated Data Warehouse (DWH) designed to fetch, process, and store global market data. Built with Python, PostgreSQL (Supabase), and GitHub Actions, it provides a seamless data pipeline for financial analysis and visualization.
 
 ## 🌟 Key Features
-- **Automated ETL Pipeline**: Monthly/Daily data extraction from Yahoo Finance.
-- **Global Asset Coverage**: Monitors 30+ assets including Tech Stocks (NVDA, AAPL), Crypto (BTC, ETH), Commodities (Gold, Oil), and Indices (S&P500, DAX).
-- **Time-Series Management**: Robust schema for handling historical prices and exchange rates.
-- **Cloud-Ready**: Fully integrated with **Supabase** for persistent cloud storage.
-- **CI/CD Automation**: Scheduled updates via **GitHub Actions** (Data-as-Code approach).
+- **Automated ETL Pipeline**: Daily extraction and full historical sync (up to 5 years).
+- **GoFin Ready**: Specifically optimized for the GoFin project, tracking the Top 30 global assets (AAPL, NVDA, BTC, etc.) with high-precision OHLCV data.
+- **Auto-Migrations**: Integrated schema management that automatically updates the database (Supabase/Docker) without manual SQL execution.
+- **Global Asset Coverage**: Monitors 30+ core assets including Tech Stocks, Crypto, Commodities, and Indices.
+- **CI/CD Automation**: Scheduled updates via **GitHub Actions** with manual trigger support for different sync modes.
 - **Visualization Ready**: Optimized for direct connection with **PowerBI** and **Tableau**.
 
 ## 🛠️ Tech Stack
@@ -21,36 +21,28 @@ AutoDataWareHouse is a modern, automated Data Warehouse (DWH) designed to fetch,
 
 ### 1. Local Development (Docker)
 1. Clone the repository.
-2. Start the local database:
+2. Start the local database: `docker-compose up -d`.
+3. Install dependencies: `pip install -r requirements.txt`.
+4. **Initialize/Migrate Database**:
    ```bash
-   docker-compose up -d
+   python src/migrate.py
    ```
-3. Install dependencies:
+5. Run the ETL process (available modes: `daily` or `history`):
    ```bash
-   pip install -r requirements.txt
-   ```
-4. Run the ETL process:
-   ```bash
-   python src/main.py
+   python src/main.py history
    ```
 
-### 2. Cloud Setup (Supabase)
-1. Create a project on [Supabase](https://supabase.com/).
-2. Obtain your **Connection URI** (use the Transaction Pooler for IPv4 compatibility).
-3. Set your environment variable:
-   ```bash
-   DATABASE_URL=your_supabase_uri
-   ```
-
-### 3. GitHub Actions Automation
-To automate daily updates:
-1. Go to your GitHub Repository **Settings > Secrets and variables > Actions**.
-2. Add a new secret named `DATABASE_URL` with your connection string.
-3. The workflow will run automatically every day at midnight (UTC).
+### 2. GitHub Actions Automation
+To automate daily updates and migrations:
+1. Configure `DATABASE_URL` in **Settings > Secrets and variables > Actions**.
+2. Trigger manually via **Actions > Daily Data Update > Run workflow**.
+   - Input `mode: daily` for nightly updates.
+   - Input `mode: history` for a full 5-year sync.
 
 ## 📊 Data Schema
-- `market_data`: Stores prices, volumes, and timestamps for stocks, crypto, and commodities.
-- `exchange_rates`: Stores daily exchange rates for major currency pairs.
+- `historical_prices`: High-precision OHLCV data (Open, High, Low, Close, Adjusted Close, Volume) for the Top 30 tracked assets. Optimized for **GoFin**.
+- `market_data`: General price and volume tracking for diverse assets.
+- `exchange_rates`: Nightly exchange rates for major currency pairs.
 
 ## 📜 License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
