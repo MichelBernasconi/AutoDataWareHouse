@@ -5,10 +5,14 @@ on:
     - cron: '0 0 * * *' # Ogni notte a mezzanotte
   workflow_dispatch: # Permette l'avvio manuale con opzioni
     inputs:
-      period:
-        description: 'Periodo temporale (es: 1d, 1y, max)'
+      mode:
+        description: 'Modalità di aggiornamento (daily o history)'
         required: false
-        default: '1d'
+        default: 'daily'
+        type: choice
+        options:
+          - daily
+          - history
 
 jobs:
   update-data:
@@ -29,8 +33,13 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Run Database Migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: python src/migrate.py
+
       - name: Run ETL Script
         env:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        # Se avviato manualmente usa l'input, altrimenti usa il default (1d)
-        run: python src/main.py ${{ github.event.inputs.period || '1d' }}
+        # Se avviato manualmente usa l'input 'mode', altrimenti usa il default 'daily'
+        run: python src/main.py ${{ github.event.inputs.mode || 'daily' }}

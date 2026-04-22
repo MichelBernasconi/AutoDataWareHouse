@@ -29,3 +29,13 @@ def insert_on_conflict_nothing(table, conn, keys, data_iter):
     stmt = insert(table.table).values(data).on_conflict_do_nothing()
     result = conn.execute(stmt)
     return result.rowcount
+
+class Database:
+    def __init__(self):
+        self.engine = get_engine()
+
+    def insert_data(self, df, table_name='historical_prices'):
+        """Inserts data from a DataFrame into the database, ignoring conflicts."""
+        if df.empty:
+            return
+        df.to_sql(table_name, self.engine, if_exists='append', index=False, method=insert_on_conflict_nothing)
