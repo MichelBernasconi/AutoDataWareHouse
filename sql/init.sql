@@ -20,8 +20,8 @@ CREATE TABLE IF NOT EXISTS exchange_rates (
 );
 
 -- Index for faster queries
-CREATE INDEX idx_market_symbol ON market_data(symbol);
-CREATE INDEX idx_market_timestamp ON market_data(timestamp);
+CREATE INDEX IF NOT EXISTS idx_market_symbol ON market_data(symbol);
+CREATE INDEX IF NOT EXISTS idx_market_timestamp ON market_data(timestamp);
 
 -- Table for detailed financial historical data (optimized for GoFin)
 CREATE TABLE IF NOT EXISTS historical_prices (
@@ -38,4 +38,4 @@ CREATE TABLE IF NOT EXISTS historical_prices (
 );
 
 -- Index for performance
-CREATE INDEX idx_symbol_date ON historical_prices(symbol, date);
+CREATE INDEX IF NOT EXISTS idx_symbol_date ON historical_prices(symbol, date);

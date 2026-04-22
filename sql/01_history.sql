@@ -13,4 +13,4 @@ CREATE TABLE IF NOT EXISTS historical_prices (
 );
 
 -- Index for performance
-CREATE INDEX idx_symbol_date ON historical_prices(symbol, date);
+CREATE INDEX IF NOT EXISTS idx_symbol_date ON historical_prices(symbol, date);
