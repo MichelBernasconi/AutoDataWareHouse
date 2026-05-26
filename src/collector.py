@@ -69,6 +69,9 @@ class DataCollector:
                 df = yf.download(ticker, period=period, interval=interval, auto_adjust=False)
                 if df.empty: continue
                 
+                # Assicuriamoci che l'indice abbia un nome noto prima del reset
+                df.index.name = 'Date'
+                
                 # Reset index per avere la data come colonna
                 df = df.reset_index()
                 df['symbol'] = ticker
@@ -81,9 +84,17 @@ class DataCollector:
                 
                 df.columns = [str(c).lower().replace(' ', '_') for c in df.columns]
                 
-                # Rename 'date'/'datetime' to 'date' if needed
-                if 'date' not in df.columns and 'datetime' in df.columns:
-                    df = df.rename(columns={'datetime': 'date'})
+                # Rename 'date'/'datetime'/'index'/'price' to 'date' if needed
+                if 'date' not in df.columns:
+                    if 'datetime' in df.columns:
+                        df = df.rename(columns={'datetime': 'date'})
+                    elif 'index' in df.columns:
+                        df = df.rename(columns={'index': 'date'})
+                    elif 'price' in df.columns:
+                        df = df.rename(columns={'price': 'date'})
+                    else:
+                        # Fallback: the first column is always the index after reset_index
+                        df = df.rename(columns={df.columns[0]: 'date'})
                 
                 all_data.append(df)
             except Exception as e:
